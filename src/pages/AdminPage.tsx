@@ -151,7 +151,8 @@ function TrainingManager() {
   };
 
   const handleAddVideo = async () => {
-    if (!addVideoTitle.trim() || !addVideoUrl.trim() || !selectedSubjectId) return;
+    if (!addVideoTitle.trim() || !addVideoUrl.trim()) { toast.error('Title and URL are required.'); return; }
+    if (!selectedSubjectId) { toast.error('No subject selected.'); return; }
     const maxSort = selectedVideos.length > 0 ? Math.max(...selectedVideos.map((v) => v.sort_order ?? 0)) : 0;
     const { error } = await supabase.from('training_videos').insert({
       subject_id: selectedSubjectId, title: addVideoTitle.trim(),
@@ -318,7 +319,7 @@ function TrainingManager() {
             </div>
             <Input placeholder="Description" value={addVideoDesc} onChange={(e) => setAddVideoDesc(e.target.value)} />
           </div>
-          <DialogFooter><Button variant="outline" onClick={() => setAddVideoOpen(false)}>Cancel</Button><Button onClick={handleAddVideo} disabled={!addVideoTitle.trim() || !addVideoUrl.trim()}>Add Video</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setAddVideoOpen(false)}>Cancel</Button><Button onClick={(e) => { e.stopPropagation(); handleAddVideo(); }} disabled={!addVideoTitle.trim() || !addVideoUrl.trim()}>Add Video</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
