@@ -278,7 +278,10 @@ export default function OnboardingFlow({ steps, progress, locationId }: Props) {
           )}
 
           {/* Checkbox */}
-          <label className="flex items-start gap-3 cursor-pointer select-none mb-6">
+          <div
+            className="flex items-start gap-3 cursor-pointer select-none mb-6"
+            onClick={!checked && !saving ? handleCheck : undefined}
+          >
             <div
               className="mt-0.5 flex-shrink-0 flex items-center justify-center rounded transition-colors"
               style={{
@@ -287,18 +290,16 @@ export default function OnboardingFlow({ steps, progress, locationId }: Props) {
                 border: checked ? 'none' : '2px solid var(--torq-border)',
                 background: checked ? 'var(--torq-accent)' : 'transparent',
               }}
-              onClick={!checked && !saving ? handleCheck : undefined}
             >
               {checked && <Check size={14} className="text-white" />}
             </div>
             <span
               className="text-sm"
               style={{ color: 'var(--torq-text-secondary)' }}
-              onClick={!checked && !saving ? handleCheck : undefined}
             >
               {CHECKBOX_LABELS[stepNumber] || 'I have completed this step.'}
             </span>
-          </label>
+          </div>
         </div>
 
         {/* Action Buttons */}
