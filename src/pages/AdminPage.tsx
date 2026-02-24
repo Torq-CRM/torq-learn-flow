@@ -151,6 +151,7 @@ function TrainingManager() {
   };
 
   const handleAddVideo = async () => {
+    console.log('[handleAddVideo] called', { addVideoTitle, addVideoUrl, selectedSubjectId });
     if (!addVideoTitle.trim() || !addVideoUrl.trim()) { toast.error('Title and URL are required.'); return; }
     if (!selectedSubjectId) { toast.error('No subject selected.'); return; }
     const maxSort = selectedVideos.length > 0 ? Math.max(...selectedVideos.map((v) => v.sort_order ?? 0)) : 0;
@@ -159,9 +160,12 @@ function TrainingManager() {
       video_url: addVideoUrl.trim(), description: addVideoDesc.trim() || null,
       sort_order: maxSort + 1,
     });
+    console.log('[handleAddVideo] result', { error });
     if (error) { toast.error('Failed to save — please check your connection.'); return; }
     queryClient.invalidateQueries({ queryKey: ['training-videos'] });
+    queryClient.invalidateQueries({ queryKey: ['training-subjects'] });
     setAddVideoTitle(''); setAddVideoUrl(''); setAddVideoDesc(''); setAddVideoOpen(false);
+    toast.success('Video added successfully.');
   };
 
   const handleDeleteVideo = async () => {
