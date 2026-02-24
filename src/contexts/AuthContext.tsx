@@ -26,15 +26,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const currentUser = session?.user ?? null;
-      setUser(currentUser);
 
       if (currentUser) {
         const { data } = await supabase.rpc('has_role', {
           _user_id: currentUser.id,
           _role: 'admin',
         });
+        // Batch both updates together to avoid flash of "Access Denied"
+        setUser(currentUser);
         setIsAdmin(!!data);
       } else {
+        setUser(null);
         setIsAdmin(false);
       }
       setLoading(false);
