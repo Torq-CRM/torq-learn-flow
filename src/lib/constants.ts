@@ -12,7 +12,7 @@ export const HEADER_CONFIG: Record<string, { icon: string; title: string; subtit
   '/automation': {
     icon: 'Zap',
     title: 'Automation Planner',
-    subtitle: 'Plan and manage your automation workflows.',
+    subtitle: 'Build and manage your automation workflows',
   },
   '/admin': {
     icon: 'Shield',
