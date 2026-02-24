@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LocationProvider } from "@/contexts/LocationContext";
 import AppGate from "@/components/AppGate";
+import AdminShell from "@/components/AdminShell";
 import TrainingPage from "@/pages/TrainingPage";
 import SubjectDetailPage from "@/pages/SubjectDetailPage";
 import ReportPage from "@/pages/ReportPage";
@@ -33,12 +34,14 @@ const App = () => (
           <LocationProvider>
             <Routes>
               <Route path="/" element={<Navigate to="/training" replace />} />
+              <Route path="/admin" element={<AdminShell />}>
+                <Route index element={<AdminPage />} />
+              </Route>
               <Route element={<AppGate />}>
                 <Route path="/training" element={<TrainingPage />} />
                 <Route path="/training/:subjectId" element={<SubjectDetailPage />} />
                 <Route path="/report" element={<ReportPage />} />
                 <Route path="/automation" element={<AutomationPage />} />
-                <Route path="/admin" element={<AdminPage />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
