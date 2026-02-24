@@ -2,12 +2,12 @@ export const HEADER_CONFIG: Record<string, { icon: string; title: string; subtit
   '/training': {
     icon: 'BookOpen',
     title: 'Training',
-    subtitle: 'Browse and complete your training modules.',
+    subtitle: 'Track your training progress across all modules',
   },
   '/report': {
     icon: 'BarChart2',
     title: 'Report',
-    subtitle: "Track your team's training progress.",
+    subtitle: 'Training analytics and completion data',
   },
   '/automation': {
     icon: 'Zap',
