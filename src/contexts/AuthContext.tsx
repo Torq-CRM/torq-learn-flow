@@ -44,7 +44,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!session) setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // Fallback timeout — never hang forever
+    const timeout = setTimeout(() => setLoading(false), 3000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
