@@ -1,24 +1,49 @@
-import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { LocationProvider } from "@/contexts/LocationContext";
+import AppGate from "@/components/AppGate";
+import TrainingPage from "@/pages/TrainingPage";
+import SubjectDetailPage from "@/pages/SubjectDetailPage";
+import ReportPage from "@/pages/ReportPage";
+import AutomationPage from "@/pages/AutomationPage";
+import AdminPage from "@/pages/AdminPage";
+import NotFound from "@/pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 5000),
+      staleTime: 30_000,
+      gcTime: 5 * 60_000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <LocationProvider>
+            <Routes>
+              <Route path="/" element={<Navigate to="/training" replace />} />
+              <Route element={<AppGate />}>
+                <Route path="/training" element={<TrainingPage />} />
+                <Route path="/training/:subjectId" element={<SubjectDetailPage />} />
+                <Route path="/report" element={<ReportPage />} />
+                <Route path="/automation" element={<AutomationPage />} />
+                <Route path="/admin" element={<AdminPage />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </LocationProvider>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
