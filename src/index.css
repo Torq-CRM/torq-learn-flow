@@ -82,3 +82,9 @@
 .font-mono-torq {
   font-family: 'Space Mono', monospace;
 }
+
+/* Admin toolbar slide-up */
+@keyframes slide-up-toolbar {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
