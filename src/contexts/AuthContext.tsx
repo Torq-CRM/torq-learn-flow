@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
@@ -23,23 +23,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const currentUser = session?.user ?? null;
-
-      if (currentUser) {
-        const { data } = await supabase.rpc('has_role', {
-          _user_id: currentUser.id,
-          _role: 'admin',
-        });
-        // Batch both updates together to avoid flash of "Access Denied"
-        setUser(currentUser);
-        setIsAdmin(!!data);
-      } else {
-        setUser(null);
-        setIsAdmin(false);
-      }
+  // Check admin role for a given user — called outside onAuthStateChange
+  const checkAdminRole = useCallback(async (u: User | null) => {
+    if (!u) {
+      setUser(null);
+      setIsAdmin(false);
       setLoading(false);
+      return;
+    }
+    try {
+      const { data } = await supabase.rpc('has_role', {
+        _user_id: u.id,
+        _role: 'admin',
+      });
+      // Batch both updates together to avoid flash of "Access Denied"
+      setUser(u);
+      setIsAdmin(!!data);
+    } catch {
+      setUser(u);
+      setIsAdmin(false);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    // IMPORTANT: Do NOT await async calls inside onAuthStateChange —
+    // supabase-js v2 awaits these callbacks during signIn, causing deadlocks.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const currentUser = session?.user ?? null;
+      // Defer the async role check to avoid blocking the auth flow
+      checkAdminRole(currentUser);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -53,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe();
       clearTimeout(timeout);
     };
-  }, []);
+  }, [checkAdminRole]);
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
