@@ -6,6 +6,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { LocationProvider } from "@/contexts/LocationContext";
 import AppGate from "@/components/AppGate";
 import AdminShell from "@/components/AdminShell";
+import AdminToolbar from "@/components/AdminToolbar";
 import TrainingPage from "@/pages/TrainingPage";
 import SubjectDetailPage from "@/pages/SubjectDetailPage";
 import ReportPage from "@/pages/ReportPage";
@@ -45,6 +46,7 @@ const App = () => (
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <AdminToolbar />
           </LocationProvider>
         </AuthProvider>
       </BrowserRouter>
