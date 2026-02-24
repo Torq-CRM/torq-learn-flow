@@ -8,10 +8,9 @@ import OnboardingFlow from '@/pages/OnboardingFlow';
 export default function AppGate() {
   const { locationId } = useLocationId();
   const { isAdmin, loading: authLoading } = useAuth();
-  const { isComplete, loading: gateLoading, steps, progress } = useOnboardingGate(locationId);
 
-  // Loading state — plain spinner, no layout chrome
-  if (authLoading || gateLoading) {
+  // Wait for auth only (with timeout fallback in AuthProvider)
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div
@@ -22,21 +21,39 @@ export default function AppGate() {
     );
   }
 
-  // No location and not admin → welcome screen
-  if (!locationId && !isAdmin) {
-    return <NoLocationScreen />;
-  }
-
-  // Admin bypasses onboarding entirely
+  // Admin bypasses EVERYTHING — no location or onboarding required
   if (isAdmin) {
     return <AppShell />;
   }
 
-  // Onboarding not complete → full-screen onboarding flow
-  if (!isComplete && locationId) {
-    return <OnboardingFlow steps={steps} progress={progress} locationId={locationId} />;
+  // No location and not admin → welcome screen
+  if (!locationId) {
+    return <NoLocationScreen />;
   }
 
-  // All good → app shell
-  return <AppShell />;
+  // Has location → check onboarding gate
+  return <LocationGate locationId={locationId} />;
+}
+
+/** Separate component so onboarding hook only runs when locationId exists */
+function LocationGate({ locationId }: { locationId: string }) {
+  const { isComplete, loading, steps, progress } = useOnboardingGate(locationId);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div
+          className="animate-spin h-6 w-6 border-2 rounded-full"
+          style={{ borderColor: 'var(--torq-accent)', borderTopColor: 'transparent' }}
+        />
+      </div>
+    );
+  }
+
+  // No steps configured or all complete → let them through
+  if (isComplete || steps.length === 0) {
+    return <AppShell />;
+  }
+
+  return <OnboardingFlow steps={steps} progress={progress} locationId={locationId} />;
 }
